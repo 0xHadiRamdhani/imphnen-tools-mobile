@@ -102,6 +102,7 @@ class _ToolScreenState extends State<ToolScreen> {
             _providerNotice(id)
           else ...[
             if (tool.id == 'password-generator') _passwordOptions(id),
+            if (tool.id == 'uuid-generator') _uuidOptions(id),
             if (tool.id == 'regex-tester') _regexOptions(id),
             if (tool.id == 'timestamp-converter') _timestampMode(id),
             if (tool.id == 'javascript-minifier')
@@ -138,17 +139,21 @@ class _ToolScreenState extends State<ToolScreen> {
                       setState(() => _minify = value.first),
                 ),
               ),
-            TextField(
-              controller: _input,
-              minLines: _multiline ? 5 : 2,
-              maxLines: _multiline ? 12 : 5,
-              keyboardType: _keyboardType,
-              decoration: InputDecoration(
-                labelText: _label(id),
-                hintText: _hint(id),
-                alignLabelWithHint: true,
+            if (!const {
+              'password-generator',
+              'uuid-generator',
+            }.contains(tool.id))
+              TextField(
+                controller: _input,
+                minLines: _singleline ? 1 : (_multiline ? 5 : 2),
+                maxLines: _singleline ? 1 : (_multiline ? 12 : 5),
+                keyboardType: _keyboardType,
+                decoration: InputDecoration(
+                  labelText: _label(id),
+                  hintText: _hint(id),
+                  alignLabelWithHint: true,
+                ),
               ),
-            ),
             if (tool.id == 'diff-checker') ...[
               const SizedBox(height: 12),
               TextField(
@@ -284,11 +289,22 @@ class _ToolScreenState extends State<ToolScreen> {
     'javascript-minifier',
     'markdown-preview',
   }.contains(widget.tool.id);
-  TextInputType get _keyboardType =>
-      widget.tool.id == 'timestamp-converter' ||
-          widget.tool.id == 'http-status-checker'
-      ? TextInputType.number
-      : TextInputType.multiline;
+  bool get _singleline => const {
+    'timestamp-converter',
+    'http-status-checker',
+    'cron-generator',
+    'color-picker',
+    'url-parser',
+    'hash-generator',
+  }.contains(widget.tool.id);
+
+  TextInputType get _keyboardType {
+    if (widget.tool.id == 'timestamp-converter' ||
+        widget.tool.id == 'http-status-checker') {
+      return TextInputType.number;
+    }
+    return _singleline ? TextInputType.text : TextInputType.multiline;
+  }
 
   Widget _providerNotice(bool id) => _MessageBox(
     icon: Pixel.cloud,
@@ -300,11 +316,27 @@ class _ToolScreenState extends State<ToolScreen> {
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
       Text('${tr(id, 'length')}: $_passwordLength'),
-      Slider(
+      Slider.adaptive(
         value: _passwordLength.toDouble(),
         min: 8,
         max: 64,
         divisions: 56,
+        label: '$_passwordLength',
+        onChanged: (value) => setState(() => _passwordLength = value.round()),
+      ),
+      const SizedBox(height: 8),
+    ],
+  );
+
+  Widget _uuidOptions(bool id) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(id ? 'Jumlah UUID: $_passwordLength' : 'Amount: $_passwordLength'),
+      Slider.adaptive(
+        value: _passwordLength.toDouble(),
+        min: 1,
+        max: 100,
+        divisions: 99,
         label: '$_passwordLength',
         onChanged: (value) => setState(() => _passwordLength = value.round()),
       ),
@@ -370,6 +402,7 @@ class _ToolScreenState extends State<ToolScreen> {
     'url-parser' => 'https://example.com/path?key=value',
     'color-picker' => '#3AA6D8',
     'cron-generator' => '*/5 * * * *',
+    'hash-generator' => id ? 'Teks untuk di-hash...' : 'Text to hash...',
     _ =>
       id ? 'Tulis atau tempel teks di sini...' : 'Type or paste text here...',
   };
@@ -392,7 +425,7 @@ class _ToolScreenState extends State<ToolScreen> {
       final result = switch (widget.tool.id) {
         'json-formatter' => _formatJson(input),
         'jwt-decoder' => _decodeJwt(input),
-        'uuid-generator' => _generateUuids(input),
+        'uuid-generator' => _generateUuids(_passwordLength.toString()),
         'password-generator' => _generatePassword(),
         'base64-converter' => _base64(input),
         'url-encoder-decoder' => _urlEncodeDecode(input),
