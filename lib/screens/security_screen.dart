@@ -1,5 +1,4 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:pixelarticons/pixelarticons.dart';
 
@@ -10,6 +9,8 @@ import 'security/api_mobile_screen.dart';
 import 'security/network_scanner_screen.dart';
 import 'security/recon_screen.dart';
 import 'security/secrets_intel_screen.dart';
+import 'security/crypto_screen.dart';
+import 'security/password_screen.dart';
 import 'security/security_report_screen.dart';
 
 class SecurityScreen extends StatefulWidget {
@@ -596,6 +597,30 @@ class _SecurityScreenState extends State<SecurityScreen> {
                       maxLines: 3,
                       decoration: const InputDecoration(
                         labelText: 'Notes / evidence context',
+                      ),
+                    ),
+                    _ActiveModuleTile(
+                      icon: Pixel.code,
+                      title: 'Cryptography & Encoders',
+                      subtitle: 'Hash generator, Base64, URL Encode',
+                      color: const Color(0xFFE99864),
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute<void>(
+                          builder: (_) => const CryptoScreen(),
+                        ),
+                      ),
+                    ),
+                    _ActiveModuleTile(
+                      icon: Pixel.lock,
+                      title: 'Password Tools',
+                      subtitle: 'Generator & Strength Checker',
+                      color: const Color(0xFF62B7A1),
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute<void>(
+                          builder: (_) => const PasswordScreen(),
+                        ),
                       ),
                     ),
                   ],
